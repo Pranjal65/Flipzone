@@ -1,0 +1,100 @@
+# List of stages for jobs, and their order of execution
+# Try to not use [needs]
+stages:
+  - test
+  - build
+  - deploy
+
+
+# Tests should run on every merge request opened
+# Merging should not be allowed if tests don't pass
+test:
+  stage: test
+  environment: development
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "client/"
+  script:
+    - npm install
+    - npm run test
+
+
+# Tests code quality before merge
+# lint-test:
+#   stage: test
+#   rules:
+#     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+#       changes:
+#         - "client/"
+#   script:
+#     - npm run lint-test
+
+
+# Optimized build is made during preview
+# Build only if src/ or public/ dir were updated
+build-preview:
+  stage: build
+  environment: development
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^preview/
+      changes:
+        - "client/"
+  script:
+    - npm install
+    - npm run build-preview
+  artifacts:
+    paths:
+      - "client/build/"
+    untracked: true
+    when: on_success
+    expire_in: 3 days
+
+
+# Optimized build is made during release
+build-release:
+  stage: build
+  environment: production
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - "client/"
+  script:
+    - npm install
+    - npm run build-release
+  artifacts:
+    paths:
+      - "client/build/"
+    untracked: true
+    when: on_success
+    expire_in: 3 days
+
+
+# Any branch w/ "preview" preifx triggers this
+deploy-preview:
+  stage: deploy
+  environment: development
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^preview/
+      changes:
+        - "client/"
+  dependencies:
+    - "build-preview"
+  script:
+    - npm install
+    - echo "Deploying to preview from branch $CI_COMMIT_BRANCH"
+
+
+# For default (master/main) branch
+deploy-release:
+  stage: deploy
+  environment: production
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - "client/"
+  dependencies:
+    - "build-release"
+  script:
+    - npm install
+    - echo "Deploying to release from branch $CI_COMMIT_BRANCH"

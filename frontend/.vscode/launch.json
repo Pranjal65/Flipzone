@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "command": "npm start",
+            "name": "npm start: Runs the app in the development mode. Open http://localhost:3000 to view it in the browser.",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}/client"
+        },
+        {
+            "command": "npm run build",
+            "name": "npm build: Builds the app for production to the build folder. It correctly bundles React in production mode and optimizes the build for the best performance.",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}/client"
+        },
+        {
+            "command": "npm run test",
+            "name": "npm test: Runs the test watcher in an interactive mode. By default, runs tests related to files changed since the last commit.",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceFolder}/client"
+        }
+    ]
+}
